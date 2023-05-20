@@ -12,11 +12,13 @@ const bodyParser =  require("express").json;
 const nodemailer = require('nodemailer');
 const { connectMongoDb } = require('./connection');
 const User = require('./models/User');
+const appRouter = require('./routes/handler');
 
 
 app.use(bodyParser())
 connectMongoDb('mongodb://127.0.0.1:27017/node-auth').then(() => console.log("mongoDb connected !!"))
 
+app.use("/",appRouter)
 
 app.get("/",(req, res) => {
     return res.send("sdjfaskjfjsf")
@@ -42,10 +44,7 @@ transporter.verify((error, success) => {
 
 
 
-const generateOtpRateLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000,
-    max: 1,
-});
+
 
 async function isUserNotPresent(email) {
     try {
@@ -58,7 +57,6 @@ async function isUserNotPresent(email) {
     }
   }
 
-  const generateOTP = () => Math.floor(Math.pow(10, 8-1) + Math.random() * 9 * Math.pow(10, 8-1));
 
   async function isUserNotPresent(email) {
     try {
