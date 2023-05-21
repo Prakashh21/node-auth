@@ -1,5 +1,5 @@
 const express = require('express')
-const { generateOtp } = require('../controllers/otp');
+const { generateOtp, loginHandler } = require('../controllers/otp');
 const generateOtpRateLimiter = require('../middlewares/middleware');
 
 const router = express.Router();
@@ -7,7 +7,8 @@ const router = express.Router();
 
 
 
-router.post("/generateOtp",generateOtpRateLimiter,generateOtp)
+router.post("/generateOtp",generateOtp)
+      .post("/login", loginHandler)
 
 
 module.exports = router
