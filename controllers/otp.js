@@ -106,48 +106,64 @@ const generateOtp = async (req , res) => {
     }
 
 
-  const loginHandler = async (req , res) => {
-    const {email,otp} = req.body;
-    console.log("email and otp", email , otp);
+const validateOtp = (data) => {
+  const currentTime = new Date();
+  const timestamp = new Date(data.timestamp);
 
-    const user = await User.findOne({email});
+  const differenceInMinutes = (currentTime - timestamp) / 1000 / 60;
 
-    user.otps.map(data => console.log(data.otp === otp))
-    // console.log(user.otps)
+  if(differenceInMinutes > 5){
+    // otp expired
+    // return res.send("otp expired")
+    return false
+  }else{
+    // otp valid
+    // return res.send("otp not expired")
+    return true
+  }
 
-    if(!user){
-      return res.status(404).json({"message":"oops this user doesnot exists in the database "});
-   }
+}
 
-   let otpMatched = false; // Flag to track OTP match
+    const loginHandler = async (req, res) => {
+      const { email, otp } = req.body;
+      console.log("email and otp", email, otp);
 
-      user.otps.map(data => {
-        if(data.otp === otp){
-          const currentTime = new Date();
-          const currentFormattedDate = currentTime.toISOString();
+      const user = await User.findOne({ email });
 
-          const timeDifferenceInMs = Math.abs(currentFormattedDate - data.otp.timestamp)
-          const minutesDifference = Math.floor(timeDifferenceInMs / (1000 * 60));
-          if(minutesDifference > 5){
-            res.send("oops your otp has been expired")
-          }else{
-            // res.send("yay correct otp matched")
-            otpMatched = true;
+
+      if (!user) {
+        return res.status(404).json({ "message": "Oops, this user does not exist in the database." });
+      }
+        let otpMatched = false; // Flag to track OTP match
+
+        user.otps.map((data) => {
+          if (data.otp === otp) {
+
+
+            if(validateOtp(data)){
+              res.send("you have entered a correct otp")
+            }else{
+              res.send("you have entered a wrong otp")
+            }
+            // if (differenceInMinutes > 5) {
+            //   return res.send("Oops, your OTP has expired.");
+            // } else {
+            //   otpMatched = true;
+            // }
           }
-        }
-      })
+        });
 
-      if (otpMatched) {
-        res.send("Yay, correct OTP matched.");
-      } else {
-        res.send({ "message": "Oops, you sent a wrong OTP." });
+        return res.send("invalid otp")
+
+        // if (otpMatched) {
+        //   return res.send("Yay, correct OTP matched.");
+        // } else {
+        //   return res.send({ "message": "Oops, you sent the wrong OTP." });
+        // }
+
       }
 
 
-
-
-
-  }
 
 
   // const loginHandler = async (req, res) => {
